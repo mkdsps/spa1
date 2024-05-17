@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+//https://www.youtube.com/watch?v=LeWuki7AQLo
 
 void ispis(int niz[], int n){
    for (int i = 0 ; i < n ; i++)
