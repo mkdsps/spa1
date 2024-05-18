@@ -12,8 +12,6 @@ int uBinarni(char *niz, int duzina){
    return binnari(niz, 0, duzina);
 }
 
-
-
 int main(){
    char* input = (char *)malloc(sizeof(char));
 
@@ -33,7 +31,7 @@ int main(){
          bin[len] = '\0';
          printf("%d",uBinarni(bin, len));
          free(bin);
-         i=j;
+         i=j-1;
       }
       else
          putchar(input[i]);
