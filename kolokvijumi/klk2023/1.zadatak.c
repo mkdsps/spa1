@@ -3,42 +3,42 @@
 #include <math.h>
 
 int binnari(char* niz, int k, int duzina){
-   if(niz[k] !=  '0' && niz[k] != '1') return 0;
-   int tren = niz[k]- '0';
-   return pow(2, duzina-k-1) * tren + binnari(niz, k+1, duzina); 
+   if (duzina <= k) return 0;
+   int tren = niz[k]-'0';
+   return pow(2, duzina-k-1)*tren + binnari(niz, k+1, duzina);
 }
 
 int uBinarni(char *niz, int duzina){
+   
    return binnari(niz, 0, duzina);
 }
 
 int main(){
-   char* input = (char *)malloc(sizeof(char));
-
-   fgets(input, 1000, stdin);
    
+   char c;
+   c = getchar();
+   while (c != '\n' && c != EOF){
+      if(c == '0' || c =='1'){
+         int i = 0, n = 1000;
+         char* bin = (char*)malloc(n*sizeof(char));
+         while(c == '1' || c =='0'){
+            if (i >= n){
+               n+= 1000;
+               bin = (char *)realloc(bin, n * sizeof(char));
+            }
 
-   for (int i = 0 ; input[i] != '\0' ; i++){
-      if(input[i] == '0' || input[i] =='1'){
-         int j = i;
-         while(input[j] == '1' || input[j] =='0')
-            j++;
-
-         int len = j - i;
-         char* bin = (char*)malloc(1000*sizeof(char));
-         for (int k = 0 ; k < len ; k++)
-            bin[k] = input[i+k];
-         bin[len] = '\0';
-         printf("%d",uBinarni(bin, len));
+            bin[i++] = c;
+            c = getchar();
+            
+         }
+         printf("%d",uBinarni(bin, i));
          free(bin);
-         i=j-1;
       }
-      else
-         putchar(input[i]);
+      else{
+         putchar(c);
+         c = getchar();
+      }
    }
-   free(input);
+
 
 }
-
-
-
