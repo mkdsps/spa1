@@ -6,12 +6,12 @@ int daLiJeSlovo(char c){
 }
 
 
-void okreniRec(char* rec, int n, int i){
-   if (i <= n / 2){
-      char t = rec[i];
-      rec[i] = rec[n - i - 1];
-      rec[n - i - 1] = t;
-      okreniRec(rec,n, i +1);
+void okreniRec(char* rec, int n){
+   if (n > 1){
+      char t = rec[0];
+      rec[0] = rec[n-1];
+      rec[n - 1] = t;
+      okreniRec(rec+1, n - 2);
    }
 }
 
@@ -39,7 +39,7 @@ int main(){
          }
          rec[n] = '\0';
          if (brojac == 1 && rec[n-1]>='A' && rec[n-1] <= 'Z')
-            okreniRec(rec, n, 0);
+            okreniRec(rec, n);
 
          printf("%s", rec);
          free(rec);
