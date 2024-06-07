@@ -28,9 +28,10 @@ int main(){
          int broj = c - '0';
          c = ucitajBroj(&broj);
 
-         if (c == '!')
+         if (c == '!'){
             printf("%d", faktorijal(broj));
-
+            c = getchar();
+         }
          else if (c == '^'){
             int s = 0;
             c = ucitajBroj(&s);
