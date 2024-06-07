@@ -1,132 +1,149 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct klub
 {
-   char naziv[100];
-   char grad[100];
-   int brojBodova, brojGolova
-} klub;
+   char *naziv;
+   char *grad;
+   int bodovi, golovi;
+}klub;
 
-typedef struct rezultat
+typedef struct utakmica
 {
-   char naziv_domaceg[100];
-   char naziv_gostujuceg[100];
-   int domaciGolovi, gostujuciGolovi;
+   char *naziv_domacina;
+   char *naziv_gostujuceg;
+   int golovi_domaceg, golovi_gostujuceg;
+}utakmica;
 
-} rezultat;
-
-void ucitajKlubove(klub res[], int* n){
-   FILE * file = fopen("klubovi.txt","r");
-   fscanf(file, "%d", n);
-   fgetc(file);
+klub* ucitajKlubove(int *n){
+   FILE *fajl = fopen("klubovi.txt", "r");
+   fscanf(fajl, "%d", n);
+   fgetc(fajl);
+   
+   klub* k = (klub *)malloc(*n * sizeof(klub));
+   char *linija = (char *)malloc(255*sizeof(char));
 
    for (int i = 0 ; i < *n ; i++){
-      fgets(res[i].naziv, 100, file);
-      res[i].naziv[strcspn(res[i].naziv, "\n")] = '\0';
-      
-      fgets(res[i].grad, 100, file);
-      res[i].grad[strcspn(res[i].grad, "\n")] = '\0';
+      fgets(linija, 255, fajl);
+      linija[strlen(linija)-1] = '\0';
+      k[i].naziv = (char *)malloc((1+strlen(linija)) * sizeof(char));
+      strcpy(k[i].naziv, linija);
 
-      fscanf(file, "%d %d", &res[i].brojBodova, &res[i].brojGolova);
-      fgetc(file);
+      fgets(linija, 255, fajl);
+      linija[strlen(linija)-1] = '\0';
+      k[i].grad = (char *)malloc((1+strlen(linija)) * sizeof(char));
+      strcpy(k[i].grad, linija);
+
+      fscanf(fajl, "%d", &k[i].bodovi);
+      fgetc(fajl);
+
+      fscanf(fajl, "%d", &k[i].golovi);
+      fgetc(fajl);
    }
 
+   free(linija);
+   fclose(fajl);
+   return k;
 }
 
-void ucitajRezultate(rezultat res[], int n){
-   FILE *file = fopen("poslednje_kolo.txt", "r");
-   
-   for (int i = 0 ; i < n ; i++){
-      fgets(res[i].naziv_domaceg, 100, file);
-      res[i].naziv_domaceg[strcspn(res[i].naziv_domaceg, "\n")] = '\0';
-      fgets(res[i].naziv_gostujuceg, 100, file);
-      res[i].naziv_gostujuceg[strcspn(res[i].naziv_gostujuceg, "\n")] = '\0';
+utakmica* ucitajUtakmice(int n){
+   FILE * fajl = fopen("poslednje_kolo.txt","r");
+   utakmica* u = (utakmica*)malloc(n * sizeof(utakmica));
+   char *linija = (char *)malloc(255 * sizeof(char));
 
-      fscanf(file, "%d %d", &res[i].domaciGolovi, &res[i].gostujuciGolovi);
-      fgetc(file);
 
+   for (int i = 0 ; i < n/2 ; i++){
+      fgets(linija, 255, fajl);
+      linija[strlen(linija)-1] = '\0';
+      u[i].naziv_domacina = (char *)malloc((1+strlen(linija)) * sizeof(char));
+      strcpy(u[i].naziv_domacina, linija);
+
+      fgets(linija, 255, fajl);
+      linija[strlen(linija)-1] = '\0';
+      u[i].naziv_gostujuceg = (char *)malloc((1 + strlen(linija))*sizeof(char));
+      strcpy(u[i].naziv_gostujuceg, linija);
+
+      fscanf(fajl, "%d", &u[i].golovi_domaceg);
+      fgetc(fajl);
+
+      fscanf(fajl, "%d", &u[i].golovi_gostujuceg);
+      fgetc(fajl);
+   }
+   free(linija);
+   fclose(fajl);
+   return u;
+}
+
+void azuriraj(klub* k, char *naziv, int golovi, int bodovi){
+   for (int i = 0 ; 1 ; i++)
+      if(strcmp(k[i].naziv,naziv) == 0){
+         k[i].golovi += golovi;
+         k[i].bodovi += bodovi;
+         return;
+      }
+}
+
+void azurirajSve(int n, klub* k, utakmica* u){
+   for (int i = 0 ; i < n/2 ; i++){
+      if(u[i].golovi_domaceg > u[i].golovi_gostujuceg){
+         azuriraj(k, u[i].naziv_domacina, u[i].golovi_domaceg, 3);
+         azuriraj(k, u[i].naziv_gostujuceg, u[i].golovi_gostujuceg, 0);
+      }
+      else if(u[i].golovi_domaceg < u[i].golovi_gostujuceg){
+         azuriraj(k, u[i].naziv_domacina, u[i].golovi_domaceg, 0);
+         azuriraj(k, u[i].naziv_gostujuceg, u[i].golovi_gostujuceg, 3);
+      }
+      else{
+         azuriraj(k, u[i].naziv_domacina, u[i].golovi_domaceg, 1);
+         azuriraj(k, u[i].naziv_gostujuceg, u[i].golovi_gostujuceg, 1);
+      }
    }
 }
 
-void azuriraj(klub klubovi[], rezultat rezultati[], int n) {
-    for (int i = 0; i < n; i++) {
-        int pobednik = 0;
-        if (rezultati[i].domaciGolovi > rezultati[i].gostujuciGolovi)
-            pobednik = 1;
-        else if (rezultati[i].domaciGolovi < rezultati[i].gostujuciGolovi)
-            pobednik = 2;
-
-        for (int j = 0; j < n; j++) {
-            if (strcmp(klubovi[j].naziv, rezultati[i].naziv_domaceg) == 0) {
-                klubovi[j].brojGolova += rezultati[i].domaciGolovi;
-                if (pobednik == 1) {
-                    klubovi[j].brojBodova += 3;
-                } else if (pobednik == 0) {
-                    klubovi[j].brojBodova += 1;
-                }
-            } else if (strcmp(klubovi[j].naziv, rezultati[i].naziv_gostujuceg) == 0) {
-                klubovi[j].brojGolova += rezultati[i].gostujuciGolovi;
-                if (pobednik == 2) {
-                    klubovi[j].brojBodova += 3;
-                } else if (pobednik == 0) {
-                    klubovi[j].brojBodova += 1;
-                }
-            }
-        }
-    }
-}
-int uporediKlubove(klub a, klub b){
-   //funkcija vraca jedan ako je klub b bolji od kluba a;
-   if(a.brojBodova > b.brojBodova || (a.brojBodova == b.brojBodova && a.brojGolova > b.brojGolova)) 
-      return 1;
+int proveri(klub a, klub b){
+   if(a.bodovi > b.bodovi || (a.bodovi == b.bodovi && a.golovi > b.golovi)) return 1;
    return 0;
 }
-void spoji(klub klubovi[], int l, int s, int d){
-   int leva_duzina = s - l + 1;
-   int desna_duzina = d-s;
 
-   klub *temp_levo = (klub*)malloc(leva_duzina * sizeof(klub));
-   klub *temp_desno = (klub*)malloc(desna_duzina* sizeof(klub));
-
-   for (int i = 0 ; i < leva_duzina ; i++)
-      temp_levo[i] = klubovi[i+l];
-   for (int i = 0 ; i < desna_duzina ; i++)
-      temp_desno[i] = klubovi[i+s+1];
-
-   int i = 0, j = 0;
-   for (int k = l; k <= d; k++){
-      if (j >= desna_duzina || (i < leva_duzina && uporediKlubove(temp_levo[i], temp_desno[j])))
-         klubovi[k] = temp_levo[i++];
-      else
-         klubovi[k] = temp_desno[j++];
-   }
-   free(temp_desno);
-   free(temp_levo);
+void swap(klub *a, klub *b){
+   klub c = *a;
+   *a = *b;
+   *b = c;
 }
 
-void mergeSort(klub klubovi[], int l, int d){
-   if(l < d){
-      int s = l + (d-l)/2;
-      mergeSort(klubovi, l, s);
-      mergeSort(klubovi, s + 1 , d);
-
-      spoji(klubovi, l, s, d);
-   }
-}
-
-void sortiraj(klub klubovi[], int n){
-   mergeSort(klubovi, 0, n-1);
-}
+void quickSort(klub* a, int n);
+void recursion(klub*a, int l, int d);
+int partition(klub*a, int l, int d);
 
 int main(){
    int n;
-   klub klubovi[100];
-   rezultat rezultati[100];
-   ucitajKlubove(klubovi, &n);
-   ucitajRezultate(rezultati, n);
-   azuriraj(klubovi,rezultati, n);
-   sortiraj(klubovi, n);
-   printf("%s - %s - %d poena - %d golova", klubovi[0].naziv, klubovi[0].grad, klubovi[0].brojBodova, klubovi[0].brojGolova);
+   klub* klubovi = ucitajKlubove(&n);
+   utakmica* utakmice = ucitajUtakmice(n);
+   azurirajSve(n, klubovi, utakmice);
+   quickSort(klubovi, n);
+   printf("%s - %s - %d - %d", klubovi[0].naziv, klubovi[0].grad, klubovi[0].bodovi, klubovi[0].golovi);
+}
+
+void quickSort(klub* a, int n){
+   recursion(a, 0, n-1);
+}
+
+void recursion(klub*a, int l, int d){
+   if (l < d){
+      int s = partition(a, l, d);
+      recursion(a, l , s - 1);
+      recursion(a, s + 1 , d);
+   }
+}
+
+int partition(klub*a, int l, int d){
+   int brojac = l;
+   
+   for (int i = l ; i < d ; i++){
+      if (proveri(a[i], a[d]))
+         swap(&a[i], &a[brojac++]);
+   }
+   swap(&a[d], &a[brojac]);
+   return brojac;
 }
