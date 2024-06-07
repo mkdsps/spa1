@@ -2,43 +2,36 @@
 #include <stdlib.h>
 #include <math.h>
 
-int binnari(char* niz, int k, int duzina){
-   if (duzina <= k) return 0;
-   int tren = niz[k]-'0';
-   return pow(2, duzina-k-1)*tren + binnari(niz, k+1, duzina);
-}
+#define LINE 255
 
-int uBinarni(char *niz, int duzina){
-   
-   return binnari(niz, 0, duzina);
+int rek(char* broj, int n){
+   if(n == 0) return 0;
+   return (broj[0]-'0')*pow(2, n-1) + rek(broj+1, n-1);
 }
 
 int main(){
+   char c = getchar();
    
-   char c;
-   c = getchar();
-   while (c != '\n' && c != EOF){
-      if(c == '0' || c =='1'){
-         int i = 0, n = 1000;
-         char* bin = (char*)malloc(n*sizeof(char));
-         while(c == '1' || c =='0'){
-            if (i >= n){
-               n+= 1000;
-               bin = (char *)realloc(bin, n * sizeof(char));
+   while(c != '\n'){
+      if(c == '0' || c == '1'){
+         int duzina = LINE;
+         char *broj = (char *)malloc(duzina* sizeof(char));
+         int k = 0;
+         while(c == '0' || c == '1'){
+            if(k > duzina){
+               duzina+=LINE;
+               broj = (char*)realloc(broj, duzina*sizeof(char));
             }
-
-            bin[i++] = c;
+            broj[k++] = c;
             c = getchar();
-            
          }
-         printf("%d",uBinarni(bin, i));
-         free(bin);
+         broj[k] = '\0';
+         printf("%d", rek(broj, k));
+         free(broj);
       }
       else{
          putchar(c);
          c = getchar();
       }
    }
-
-
 }
